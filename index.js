@@ -1,62 +1,54 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 const express = require('express');
-
 const app = express();
-app.use(express.json());
 
+// Mantém o Render acordado
+const port = process.env.PORT || 10000;
+app.get('/', (req, res) => res.send('Bot do Dogão da Rosa rodando!'));
+app.listen(port, () => console.log(`Servidor web iniciado na porta ${port}`));
+
+// Configuração do Robô adaptada para o Render
 const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+        ]
+    }
 });
 
-client.on('qr', (qr) => {
-    console.log('👇👇👇 ESCANEIE O QR CODE ABAIXO NO SEU WHATSAPP 👇👇👇');
-    qrcode.generate(qr, {small: true});
+// 👇👇👇 ATENÇÃO: COLOQUE O NÚMERO DO DOGÃO AQUI 👇👇👇
+// Regra: Começa com 55 (Brasil) + Seu DDD + Número
+const numeroDogao = '5573999999999'; // <-- APAGUE ESSE NÚMERO E COLOQUE O SEU!
+
+client.on('qr', async (qr) => {
+    console.log('\n==================================================');
+    console.log('🤖 Solicitando código de acesso ao WhatsApp...');
+    try {
+        const codigo = await client.requestPairingCode(numeroDogao);
+        console.log('👉 SEU CÓDIGO DO WHATSAPP É:', codigo);
+        console.log('\nAbra o WhatsApp no celular > Aparelhos Conectados');
+        console.log('Toque em "Conectar com número de telefone" e digite o código acima.');
+        console.log('==================================================\n');
+    } catch (erro) {
+        console.log('Erro ao gerar código. Verifique se o número está correto:', erro.message);
+    }
 });
 
 client.on('ready', () => {
-    console.log('✅ TUDO PRONTO! O Robô do Dogão está conectado!');
+    console.log('\n✅ TUDO PRONTO! O Robô do Dogão está conectado e operando!\n');
 });
 
-// AQUI O ROBÔ RESPONDE QUEM MANDA MENSAGEM
+// Resposta automática de teste
 client.on('message', async msg => {
-    const texto = msg.body.toLowerCase();
-    
-    // Saudação inicial
-    if (texto === 'oi' || texto === 'olá' || texto === 'ola' || texto === 'boa noite') {
-        await msg.reply('Boa noite! Que bom ter você aqui no *Dogão da Rosa* 🌭\n\nFaça seu pedido diretamente pelo nosso link de delivery:\n👉 *https://seusite.com.br/delivery*');
+    const mensagem = msg.body.toLowerCase();
+    if (mensagem === 'oi' || mensagem === 'boa noite' || mensagem === 'olá') {
+        await msg.reply('Olá! Sou o assistente virtual do *Dogão da Rosa* 🌭.\n\nFaça seu pedido pelo nosso cardápio digital acessando o link abaixo:\n🔗 [COLOQUE_SEU_LINK_AQUI]');
     }
 });
 
 client.initialize();
-
-// AQUI É A "PORTA" PARA A SUA HOSTINGER AVISAR O ROBÔ
-app.post('/avisar-cliente', async (req, res) => {
-    try {
-        const numero = req.body.numero; 
-        const status = req.body.status; 
-        
-        // Coloca o 55 do Brasil e formata pro WhatsApp
-        const chatId = '55' + numero + '@c.us';
-        
-        let msgAviso = '';
-        if (status === 'cozinha') {
-            msgAviso = '👨‍🍳 Oba! O seu Dogão acabou de ir para a chapa. Daqui a pouco tá pronto!';
-        } else if (status === 'entrega') {
-            msgAviso = '🛵 Vrum vrum! Seu pedido saiu para entrega. Já vai separando o pagamento!';
-        }
-
-        if (msgAviso !== '') {
-            await client.sendMessage(chatId, msgAviso);
-        }
-
-        res.json({ sucesso: true, mensagem: 'Aviso enviado pelo robô!' });
-    } catch (erro) {
-        res.json({ sucesso: false, erro: erro.message });
-    }
-});
-
-// Mantém o robô acordado
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
