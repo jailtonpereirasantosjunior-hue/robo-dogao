@@ -23,7 +23,7 @@ const client = new Client({
 
 // 👇👇👇 ATENÇÃO: COLOQUE O NÚMERO DO DOGÃO AQUI 👇👇👇
 // Regra: Começa com 55 (Brasil) + Seu DDD + Número
-const numeroDogao = '5573999999999'; // <-- APAGUE ESSE NÚMERO E COLOQUE O SEU!
+const numeroDogao = '5573998684086'; // <-- APAGUE ESSE NÚMERO E COLOQUE O SEU!
 
 client.on('qr', async (qr) => {
     console.log('\n==================================================');
