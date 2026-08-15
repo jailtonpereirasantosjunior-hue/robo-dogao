@@ -23,7 +23,7 @@ const client = new Client({
 
 // 👇 SEU NÚMERO JÁ CONFIGURADO AQUI 👇
 // Formato: 55 + 73 + 998684086
-const numeroDogao = '5573998684086'; 
+const numeroDogao = '557398684086'; 
 
 client.on('qr', async (qr) => {
     console.log('\n==================================================');
