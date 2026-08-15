@@ -21,9 +21,9 @@ const client = new Client({
     }
 });
 
-// 👇👇👇 ATENÇÃO: COLOQUE O NÚMERO DO DOGÃO AQUI 👇👇👇
-// Regra: Começa com 55 (Brasil) + Seu DDD + Número
-const numeroDogao = '5573998684086'; // <-- APAGUE ESSE NÚMERO E COLOQUE O SEU!
+// 👇 SEU NÚMERO JÁ CONFIGURADO AQUI 👇
+// Formato: 55 + 73 + 998684086
+const numeroDogao = '5573998684086'; 
 
 client.on('qr', async (qr) => {
     console.log('\n==================================================');
@@ -46,7 +46,7 @@ client.on('ready', () => {
 // Resposta automática de teste
 client.on('message', async msg => {
     const mensagem = msg.body.toLowerCase();
-    if (mensagem === 'oi' || mensagem === 'boa noite' || mensagem === 'olá') {
+    if (mensagem === 'oi' || mensagem === 'boa noite' || mensagem === 'ola' || mensagem === 'olá') {
         await msg.reply('Olá! Sou o assistente virtual do *Dogão da Rosa* 🌭.\n\nFaça seu pedido pelo nosso cardápio digital acessando o link abaixo:\n🔗 [COLOQUE_SEU_LINK_AQUI]');
     }
 });
