@@ -7,7 +7,7 @@ const port = process.env.PORT || 10000;
 app.get('/', (req, res) => res.send('Bot do Dogão da Rosa rodando!'));
 app.listen(port, () => console.log(`Servidor web iniciado na porta ${port}`));
 
-// Configuração do Robô adaptada para o Render
+// Configuração do Robô adaptada para o Render (mais leve para não travar)
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -16,27 +16,34 @@ const client = new Client({
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
             '--disable-gpu'
         ]
     }
 });
 
-// 👇 SEU NÚMERO JÁ CONFIGURADO AQUI 👇
-// Formato: 55 + 73 + 998684086
+// 👇 SEU NÚMERO CONFIGURADO (Sem o 9 extra, conforme o WhatsApp pediu) 👇
 const numeroDogao = '557398684086'; 
 
 client.on('qr', async (qr) => {
     console.log('\n==================================================');
-    console.log('🤖 Solicitando código de acesso ao WhatsApp...');
-    try {
-        const codigo = await client.requestPairingCode(numeroDogao);
-        console.log('👉 SEU CÓDIGO DO WHATSAPP É:', codigo);
-        console.log('\nAbra o WhatsApp no celular > Aparelhos Conectados');
-        console.log('Toque em "Conectar com número de telefone" e digite o código acima.');
-        console.log('==================================================\n');
-    } catch (erro) {
-        console.log('Erro ao gerar código. Verifique se o número está correto:', erro.message);
-    }
+    console.log('⏳ WhatsApp carregou! Dando 8 segundos pro servidor respirar...');
+    
+    // Freio de 8 segundos para evitar o erro de Timeout/Desconexão no Render
+    setTimeout(async () => {
+        try {
+            console.log('🤖 Solicitando código de acesso agora...');
+            const codigo = await client.requestPairingCode(numeroDogao);
+            console.log('\n👉 SEU CÓDIGO DO WHATSAPP É:', codigo);
+            console.log('Abra o WhatsApp > Aparelhos Conectados > Conectar com número');
+            console.log('==================================================\n');
+        } catch (erro) {
+            console.log('\n❌ ERRO DETALHADO:', erro.message);
+            console.log('⚠️ DICA: Se o erro falar algo de "Timeout" ou "Too many requests", o WhatsApp te deu um bloqueio temporário por muitas tentativas. Deixe o robô quieto por 15 minutos, e depois clique em "Restart Web Service" no Render.\n');
+        }
+    }, 8000); // 8000 milissegundos = 8 segundos
 });
 
 client.on('ready', () => {
